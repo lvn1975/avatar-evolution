@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta name="description" content="Коллекционная казуальная игра для ВКонтакте. Создай уникального аватара, прокачивай характеристики за лайки и комментарии, собирай редкие предметы!">
+    <title>🎮 Эволюция аватара</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .game-content {
+            padding: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            background: #f0f0f0;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        .avatar-creator {
+            text-align: center;
+        }
+
+        .avatar-preview {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 5px solid white;
+        }
+
+        .avatar-element {
+            position: absolute;
+            font-size: 3em;
+            z-index: 1;
+        }
+
+        .avatar-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            opacity: 0.2;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .stat-name {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s;
+        }
+
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .task-card:active {
+            transform: translateY(0);
+        }
+
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-reward {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .collection-item {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .collection-item.rare {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: white;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .collection-item.legendary {
+            background: linear-gradient(135deg, #ff00ff 0%, #8000ff 100%);
+            color: white;
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.7);
+        }
+
+        .collection-item:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .collection-item-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .collection-item-name {
+            font-size: 0.8em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 10px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .button.success {
+            background: linear-gradient(135deg, #00c853 0%, #00e676 100%);
+        }
+
+        .button.danger {
+            background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+        }
+
+        .daily-bonus {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .daily-bonus h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .daily-bonus p {
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.error {
+            background: #ff1744;
+        }
+
+        .notification.info {
+            background: #2979ff;
+        }
+
+        .notification.warning {
+            background: #ff9100;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .avatar-customization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .customization-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .customization-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .option-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .option-btn.active {
+            border-color: #667eea;
+            background: #f0f0ff;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .leaderboard {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .leaderboard-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .leaderboard-item:first-child {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .leaderboard-item:nth-child(2) {
+            color: #c0c0c0;
+        }
+
+        .leaderboard-item:nth-child(3) {
+            color: #cd7f32;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .energy-bar {
+            background: linear-gradient(90deg, #ff1744, #ff5252);
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .tasks-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🎮 Эволюция аватара</h1>
+            <p>Развивай своего персонажа и собирай уникальную коллекцию!</p>
+        </div>
+
+        <div class="game-content">
+            <!-- Экран создания аватара -->
+            <div id="avatar-creator-screen" class="avatar-creator">
+                <h2 style="text-align: center; margin-bottom: 20px;">🎨 Создай своего аватара</h2>
+                
+                <div class="avatar-preview" id="avatar-preview">
+                    <div class="avatar-bg"></div>
+                    <div class="avatar-element" id="avatar-hair">💇</div>
+                    <div class="avatar-element" id="avatar-face">😊</div>
+                    <div class="avatar-element" id="avatar-clothes">👕</div>
+                </div>
+                
+                <div class="avatar-customization">
+                    <div class="customization-group">
+                        <div class="customization-label">Причёска</div>
+                        <div class="options-grid" id="hair-options">
+                            <!-- Будут добавлены динамически -->
+                        </div>
+                    </div>
+
+                    <div class="customization-group">
+                        <div class="customization-label">Лицо</div>
+                        <div class="options-grid" id="face-options">
+                            <!-- Будут добавлены динамически -->
+                        </div>
+                    </div>
+
+                    <div class="customization-group">
+                        <div class="customization-label">Одежда</div>
+                        <div class="options-grid" id="clothes-options">
+                            <!-- Будут добавлены динамически -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin: 20px 0; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="button secondary" onclick="randomizeAvatar()">
+                        <span>🎲</span> Случайный
+                    </button>
+                    <button class="button" onclick="nextStep()">
+                        <span>▶️</span> Начать игру
+                    </button>
+                </div>
+            </div>
+
+            <!-- Основной экран игры -->
+            <div id="main-game-screen" class="hidden">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('stats')">📊 Статистика</div>
+                    <div class="tab" onclick="switchTab('tasks')">🎯 Задания</div>
+                    <div class="tab" onclick="switchTab('collection')">🏆 Коллекция</div>
+                    <div class="tab" onclick="switchTab('social')">👥 Социальное</div>
+                </div>
+
+                <!-- Статистика -->
+                <div id="stats-tab">
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="avatar-element">🎭</div>
+                            <div class="stat-name">Креативность</div>
+                            <div class="stat-value" id="creativity-value">0</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="creativity-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="avatar-element">✨</div>
+                            <div class="stat-name">Харизма</div>
+                            <div class="stat-value" id="charisma-value">0</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="charisma-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="avatar-element">🧠</div>
+                            <div class="stat-name">Интеллект</div>
+                            <div class="stat-value" id="intelligence-value">0</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="intelligence-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="avatar-element">⚡</div>
+                            <div class="stat-name">Энергия</div>
+                            <div class="stat-value" id="energy-value">100</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill energy-bar" id="energy-progress" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="daily-bonus" id="daily-bonus">
+                        <h3><span>🎁</span> Ежедневный бонус!</h3>
+                        <p>Зайди сегодня и получи эксклюзивную эмоцию!</p>
+                        <button class="button success" onclick="claimDailyBonus()">Получить бонус</button>
+                    </div>
+
+                    <div class="leaderboard">
+                        <div class="leaderboard-title">🏆 Топ-10 эволюционеров (неделя)</div>
+                        <ul class="leaderboard-list" id="leaderboard-list">
+                            <li class="leaderboard-item">
+                                <span>🥇 Игрок 1</span>
+                                <span>1,250 очков</span>
+                            </li>
+                            <li class="leaderboard-item">
+                                <span>🥈 Игрок 2</span>
+                                <span>1,120 очков</span>
+                            </li>
+                            <li class="leaderboard-item">
+                                <span>🥉 Игрок 3</span>
+                                <span>980 очков</span>
+                            </li>
+                            <li class="leaderboard-item">
+                                <span>Игрок 4</span>
+                                <span>850 очков</span>
+                            </li>
+                            <li class="leaderboard-item">
+                                <span>Игрок 5</span>
+                                <span>720 очков</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Задания -->
+                <div id="tasks-tab" class="hidden">
+                    <h2 style="margin-bottom: 20px; text-align: center;">🎯 Доступные задания</h2>
+                    <div class="tasks-container" id="tasks-container">
+                        <!-- Задания будут добавлены динамически -->
+                    </div>
+                </div>
+
+                <!-- Коллекция -->
+                <div id="collection-tab" class="hidden">
+                    <h2 style="margin-bottom: 20px; text-align: center;">🏆 Моя коллекция</h2>
+                    <div class="collection-grid" id="collection-grid">
+                        <!-- Предметы коллекции будут добавлены динамически -->
+                    </div>
+                </div>
+
+                <!-- Социальное -->
+                <div id="social-tab" class="hidden">
+                    <h2 style="margin-bottom: 20px; text-align: center;">👥 Социальные возможности</h2>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 15px;">👥 Пригласи друзей!</h3>
+                        <p style="margin: 10px 0; line-height: 1.6;">
+                            Играй вместе с друзьями и получай дополнительные бонусы за каждого приглашённого игрока!
+                        </p>
+                        <button class="button" onclick="inviteFriends()">
+                            <span>💌</span> Пригласить друзей
+                        </button>
+                        
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                            <h3 style="margin-bottom: 15px;">🤝 Совместные квесты</h3>
+                            <p style="margin: 10px 0; line-height: 1.6;">
+                                Найди партнера для выполнения особых заданий и получите двойные награды!
+                            </p>
+                            <button class="button secondary" onclick="findPartner()">
+                                <span>🔍</span> Найти партнера
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                        <h4 style="margin-bottom: 10px;">💡 Советы:</h4>
+                        <ul style="padding-left: 20px; line-height: 1.8;">
+                            <li>Чем больше друзей, тем больше бонусов</li>
+                            <li>Совместные квесты дают ×2 к наградам</li>
+                            <li>Подарки от друзей восстанавливают энергию</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные игры
+        let gameData = {
+            avatar: {
+                hair: '💇',
+                face: '😊',
+                clothes: '👕',
+                accessories: []
+            },
+            stats: {
+                creativity: 0,
+                charisma: 0,
+                intelligence: 0,
+                energy: 100
+            },
+            collection: [],
+            tasks: [
+                { id: 1, name: 'Поставить 5 лайков', reward: { type: 'stat', stat: 'charisma', value: 10 }, icon: '👍', cost: 5 },
+                { id: 2, name: 'Написать 3 комментария', reward: { type: 'stat', stat: 'creativity', value: 15 }, icon: '💬', cost: 10 },
+                { id: 3, name: 'Сделать 2 репоста', reward: { type: 'stat', stat: 'intelligence', value: 8 }, icon: '🔄', cost: 8 },
+                { id: 4, name: 'Найти скрытый символ', reward: { type: 'item', item: '🕶️ Очки стиляги', rarity: 'rare' }, icon: '🔍', cost: 15 },
+                { id: 5, name: 'Пригласить друга', reward: { type: 'item', item: '👑 Корона лидера', rarity: 'legendary' }, icon: '👑', cost: 20 },
+                { id: 6, name: 'Поставить 10 лайков', reward: { type: 'stat', stat: 'charisma', value: 25 }, icon: '❤️', cost: 12 },
+                { id: 7, name: 'Написать 5 комментариев', reward: { type: 'stat', stat: 'creativity', value: 30 }, icon: '✍️', cost: 18 },
+                { id: 8, name: 'Сделать 5 репостов', reward: { type: 'item', item: '🚀 Ракета скорости', rarity: 'rare' }, icon: '🚀', cost: 25 }
+            ],
+            completedTasks: [],
+            lastLogin: null,
+            dailyBonusClaimed: false,
+            version: '1.0'
+        };
+
+        // Опции для кастомизации аватара
+        const hairOptions = ['💇', '👨', '👩', '👴', '👶', '👱', '🧔', '🧓', '🙍', '🙎'];
+        const faceOptions = ['😊', '😎', '😇', '😉', '😍', '😏', '😎', '🤩', '🥳', '🙂'];
+        const clothesOptions = ['👕', '👔', '👗', '🧥', '🥼', '👘', '🥻', '🩳', '🧥', '🧣'];
+
+        // Инициализация игры
+        function initGame() {
+            // Проверяем, есть ли сохраненные данные
+            const savedData = localStorage.getItem('avatarEvolutionData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                // Обновляем структуру данных, если версия старая
+                if (parsedData.version !== gameData.version) {
+                    gameData = {...gameData, ...parsedData};
+                } else {
+                    gameData = parsedData;
+                }
+                // Проверяем ежедневный бонус
+                checkDailyBonus();
+                showMainScreen();
+            } else {
+                // Новый игрок
+                showAvatarCreator();
+                renderCustomizationOptions();
+            }
+            updateUI();
+        }
+
+        // Отображение экрана создания аватара
+        function showAvatarCreator() {
+            document.getElementById('avatar-creator-screen').classList.remove('hidden');
+            document.getElementById('main-game-screen').classList.add('hidden');
+        }
+
+        // Отображение основного экрана игры
+        function showMainScreen() {
+            document.getElementById('avatar-creator-screen').classList.add('hidden');
+            document.getElementById('main-game-screen').classList.remove('hidden');
+        }
+
+        // Рендер опций кастомизации
+        function renderCustomizationOptions() {
+            const hairContainer = document.getElementById('hair-options');
+            const faceContainer = document.getElementById('face-options');
+            const clothesContainer = document.getElementById('clothes-options');
+
+            hairOptions.forEach((hair, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (index === 0 ? ' active' : '');
+                btn.innerHTML = hair;
+                btn.onclick = () => {
+                    document.querySelectorAll('#hair-options .option-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameData.avatar.hair = hair;
+                    updateAvatarPreview();
+                };
+                hairContainer.appendChild(btn);
+            });
+
+            faceOptions.forEach((face, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (index === 0 ? ' active' : '');
+                btn.innerHTML = face;
+                btn.onclick = () => {
+                    document.querySelectorAll('#face-options .option-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameData.avatar.face = face;
+                    updateAvatarPreview();
+                };
+                faceContainer.appendChild(btn);
+            });
+
+            clothesOptions.forEach((clothes, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn' + (index === 0 ? ' active' : '');
+                btn.innerHTML = clothes;
+                btn.onclick = () => {
+                    document.querySelectorAll('#clothes-options .option-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    gameData.avatar.clothes = clothes;
+                    updateAvatarPreview();
+                };
+                clothesContainer.appendChild(btn);
+            });
+        }
+
+        // Случайная генерация аватара
+        function randomizeAvatar() {
+            gameData.avatar.hair = hairOptions[Math.floor(Math.random() * hairOptions.length)];
+            gameData.avatar.face = faceOptions[Math.floor(Math.random() * faceOptions.length)];
+            gameData.avatar.clothes = clothesOptions[Math.floor(Math.random() * clothesOptions.length)];
+            
+            // Обновляем активные кнопки
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+            
+            updateAvatarPreview();
+            showNotification('🎲 Аватар случайно сгенерирован!', 'info');
+        }
+
+        // Обновить превью аватара
+        function updateAvatarPreview() {
+            document.getElementById('avatar-hair').textContent = gameData.avatar.hair;
+            document.getElementById('avatar-face').textContent = gameData.avatar.face;
+            document.getElementById('avatar-clothes').textContent = gameData.avatar.clothes;
+        }
+
+        // Следующий шаг (переход к основной игре)
+        function nextStep() {
+            if (gameData.stats.energy === 0) {
+                gameData.stats.energy = 100;
+            }
+            gameData.lastLogin = new Date().toISOString();
+            gameData.dailyBonusClaimed = false;
+            saveGameData();
+            showMainScreen();
+            showNotification('🎉 Аватар создан! Добро пожаловать в игру!', 'success');
+            
+            // Добавляем стартовые предметы
+            setTimeout(() => {
+                gameData.collection.push('🎁 Стартовый подарок');
+                gameData.stats.creativity += 5;
+                gameData.stats.charisma += 5;
+                gameData.stats.intelligence += 5;
+                saveGameData();
+                updateUI();
+                showNotification('🎁 Получен стартовый подарок! +5 ко всем характеристикам!', 'success');
+            }, 1000);
+        }
+
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.classList.add('hidden'));
+            
+            // Показать выбранную вкладку
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // Обновить контент вкладки
+            if (tabName === 'tasks') {
+                renderTasks();
+            } else if (tabName === 'collection') {
+                renderCollection();
+            } else if (tabName === 'stats') {
+                updateUI();
+            }
+        }
+
+        // Отображение заданий
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            
+            const availableTasks = gameData.tasks.filter(task => !gameData.completedTasks.includes(task.id));
+            
+            if (availableTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎉</div>
+                        <h3>Все задания выполнены!</h3>
+                        <p>Новые задания появятся завтра или после обновления игры</p>
+                        <button class="button" onclick="resetTasks()" style="margin-top: 20px;">
+                            <span>🔄</span> Сбросить задания
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            availableTasks.forEach(task => {
+                if (gameData.stats.energy >= task.cost) {
+                    const taskCard = document.createElement('div');
+                    taskCard.className = 'task-card';
+                    taskCard.innerHTML = `
+                        <div class="task-title">
+                            <span>${task.icon}</span>
+                            <span>${task.name}</span>
+                        </div>
+                        <div class="task-reward">
+                            ${task.reward.type === 'stat' 
+                                ? `+${task.reward.value} к ${getStatName(task.reward.stat)}` 
+                                : `🎁 ${task.reward.item}`}
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.85em; color: #999;">
+                            💡 Требует: ${task.cost} энергии
+                        </div>
+                    `;
+                    taskCard.onclick = () => completeTask(task.id);
+                    container.appendChild(taskCard);
+                }
+            });
+            
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚡</div>
+                        <h3>Недостаточно энергии</h3>
+                        <p>Отдохните или получите ежедневный бонус для восстановления</p>
+                        <button class="button secondary" onclick="switchTab('stats')" style="margin-top: 20px;">
+                            <span>📊</span> Посмотреть статистику
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Получение названия характеристики
+        function getStatName(stat) {
+            const names = {
+                creativity: 'креативности',
+                charisma: 'харизме',
+                intelligence: 'интеллекту',
+                energy: 'энергии'
+            };
+            return names[stat] || stat;
+        }
+
+        // Выполнение задания
+        function completeTask(taskId) {
+            const task = gameData.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            if (gameData.stats.energy < task.cost) {
+                showNotification('⚡ Недостаточно энергии!', 'error');
+                return;
+            }
+            
+            // Награда за задание
+            if (task.reward.type === 'stat') {
+                gameData.stats[task.reward.stat] += task.reward.value;
+                showNotification(`✅ Задание выполнено! +${task.reward.value} к ${getStatName(task.reward.stat)}`, 'success');
+            } else if (task.reward.type === 'item') {
+                gameData.collection.push(task.reward.item);
+                const rarityText = task.reward.rarity === 'legendary' ? 'легендарный' : 
+                                   task.reward.rarity === 'rare' ? 'редкий' : 'обычный';
+                showNotification(`✅ Задание выполнено! Получен ${rarityText} предмет: ${task.reward.item}`, 'success');
+            }
+            
+            // Добавляем в выполненные
+            gameData.completedTasks.push(taskId);
+            
+            // Расходуем энергию
+            gameData.stats.energy = Math.max(0, gameData.stats.energy - task.cost);
+            
+            saveGameData();
+            updateUI();
+            
+            // Восстановление энергии через время
+            setTimeout(() => {
+                if (gameData.stats.energy < 100) {
+                    gameData.stats.energy = Math.min(100, gameData.stats.energy + 5);
+                    saveGameData();
+                    updateUI();
+                }
+            }, 300000); // 5 минут
+        }
+
+        // Сброс заданий (для тестирования)
+        function resetTasks() {
+            gameData.completedTasks = [];
+            saveGameData();
+            renderTasks();
+            showNotification('🔄 Задания сброшены!', 'info');
+        }
+
+        // Отображение коллекции
+        function renderCollection() {
+            const container = document.getElementById('collection-grid');
+            container.innerHTML = '';
+            
+            if (gameData.collection.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: span 4;">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>Коллекция пуста</h3>
+                        <p>Выполняй задания, чтобы получать уникальные предметы!</p>
+                        <button class="button" onclick="switchTab('tasks')" style="margin-top: 20px;">
+                            <span>🎯</span> Перейти к заданиям
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            gameData.collection.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                let rarityClass = '';
+                
+                if (item.includes('Корона') || item.includes('легендарный')) {
+                    rarityClass = 'legendary';
+                } else if (item.includes('Очки') || item.includes('Ракета') || item.includes('редкий')) {
+                    rarityClass = 'rare';
+                }
+                
+                itemElement.className = 'collection-item ' + rarityClass;
+                itemElement.innerHTML = `
+                    <div class="collection-item-icon">${item.split(' ')[0]}</div>
+                    <div class="collection-item-name">${item.split(' ').slice(1).join(' ') || item}</div>
+                `;
+                container.appendChild(itemElement);
+            });
+        }
+
+        // Проверка ежедневного бонуса
+        function checkDailyBonus() {
+            const today = new Date().toDateString();
+            const lastLogin = gameData.lastLogin ? new Date(gameData.lastLogin).toDateString() : null;
+            
+            const dailyBonusElement = document.getElementById('daily-bonus');
+            
+            if (lastLogin !== today) {
+                gameData.dailyBonusClaimed = false;
+                dailyBonusElement.style.display = 'block';
+            } else {
+                dailyBonusElement.style.display = gameData.dailyBonusClaimed ? 'none' : 'block';
+            }
+        }
+
+        // Получение ежедневного бонуса
+        function claimDailyBonus() {
+            if (gameData.dailyBonusClaimed) {
+                showNotification('🎁 Бонус уже получен сегодня!', 'warning');
+                return;
+            }
+            
+            // Добавляем случайный предмет в коллекцию
+            const bonusItems = [
+                '🎉 Эмоция: танец',
+                '✨ Эффект: свечение',
+                '👑 Редкая шляпа',
+                '💎 Кристалл удачи',
+                '🌟 Звезда победителя',
+                '🌈 Радужный фон',
+                '🔥 Огонь страстей',
+                '❄️ Ледяная корона'
+            ];
+            const randomItem = bonusItems[Math.floor(Math.random() * bonusItems.length)];
+            
+            // Определяем редкость
+            let rarity = '';
+            if (randomItem.includes('Корона') || randomItem.includes('Звезда')) {
+                rarity = 'legendary';
+            } else if (randomItem.includes('Эффект') || randomItem.includes('Кристалл')) {
+                rarity = 'rare';
+            }
+            
+            gameData.collection.push(randomItem);
+            
+            // Восстанавливаем энергию
+            gameData.stats.energy = 100;
+            
+            gameData.dailyBonusClaimed = true;
+            gameData.lastLogin = new Date().toISOString();
+            
+            const rarityText = rarity === 'legendary' ? 'легендарный' : 
+                               rarity === 'rare' ? 'редкий' : 'уникальный';
+            
+            showNotification(`🎁 Получен ежедневный бонус: ${rarityText} предмет "${randomItem}"! Энергия восстановлена!`, 'success');
+            saveGameData();
+            updateUI();
+            
+            // Скрываем блок бонуса
+            document.getElementById('daily-bonus').style.display = 'none';
+        }
+
+        // Приглашение друзей
+        function inviteFriends() {
+            showNotification('👥 Отправляю приглашения друзьям...', 'info');
+            
+            // Имитация отправки приглашений
+            setTimeout(() => {
+                const friendsCount = Math.floor(Math.random() * 3) + 1;
+                gameData.stats.charisma += friendsCount * 10;
+                
+                if (friendsCount > 0) {
+                    gameData.collection.push('💌 Письмо дружбы');
+                    showNotification(`✅ Приглашено ${friendsCount} друзей! +${friendsCount * 10} к харизме и получено письмо дружбы!`, 'success');
+                } else {
+                    showNotification('⚠️ Не удалось найти друзей для приглашения', 'warning');
+                }
+                
+                saveGameData();
+                updateUI();
+            }, 1500);
+        }
+
+        // Поиск партнера
+        function findPartner() {
+            showNotification('🔍 Ищу партнера для совместных квестов...', 'info');
+            
+            setTimeout(() => {
+                const partners = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Екатерина', 'Иван', 'Ольга'];
+                const randomPartner = partners[Math.floor(Math.random() * partners.length)];
+                
+                // 30% шанс не найти партнера
+                if (Math.random() < 0.3) {
+                    showNotification('⚠️ Не удалось найти партнера. Попробуйте позже!', 'warning');
+                    return;
+                }
+                
+                showNotification(`✅ Найден партнер: ${randomPartner}! Теперь вы можете выполнять совместные задания.`, 'success');
+                
+                // Добавляем бонус за поиск партнера
+                gameData.stats.creativity += 10;
+                gameData.collection.push('🤝 Знак дружбы');
+                saveGameData();
+                updateUI();
+            }, 2000);
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            // Обновление статистики
+            document.getElementById('creativity-value').textContent = gameData.stats.creativity;
+            document.getElementById('charisma-value').textContent = gameData.stats.charisma;
+            document.getElementById('intelligence-value').textContent = gameData.stats.intelligence;
+            document.getElementById('energy-value').textContent = gameData.stats.energy;
+            
+            // Обновление прогресс-баров
+            document.getElementById('creativity-progress').style.width = `${Math.min(100, gameData.stats.creativity)}%`;
+            document.getElementById('charisma-progress').style.width = `${Math.min(100, gameData.stats.charisma)}%`;
+            document.getElementById('intelligence-progress').style.width = `${Math.min(100, gameData.stats.intelligence)}%`;
+            document.getElementById('energy-progress').style.width = `${gameData.stats.energy}%`;
+            
+            // Проверка ежедневного бонуса
+            checkDailyBonus();
+        }
+
+        // Сохранение данных игры
+        function saveGameData() {
+            localStorage.setItem('avatarEvolutionData', JSON.stringify(gameData));
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.innerHTML = `
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Автоматическое восстановление энергии (каждые 5 минут)
+        setInterval(() => {
+            if (gameData.stats.energy < 100 && gameData.lastLogin) {
+                gameData.stats.energy = Math.min(100, gameData.stats.energy + 1);
+                saveGameData();
+                updateUI();
+            }
+        }, 300000); // 5 минут = 300000 мс
+
+        // Инициализация при загрузке
+        window.onload = initGame;
+    </script>
+</body>
+</html>

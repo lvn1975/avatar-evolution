@@ -186,7 +186,13 @@
             border: 1px solid #e0e0e0;
         }
 
-        .task-card:hover {
+        .task-card.completed {
+            opacity: 0.6;
+            cursor: default;
+            border-left-color: #999;
+        }
+
+        .task-card:hover:not(.completed) {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-color: #667eea;
@@ -202,12 +208,59 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .task-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .task-reward {
             color: #667eea;
             font-size: 0.9em;
-            margin-top: 5px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .task-confirm {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-confirm input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .task-confirm label {
+            font-size: 0.85em;
+            color: #555;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .task-button {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            font-size: 0.95em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .task-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .collection-grid {
@@ -475,6 +528,16 @@
             background: linear-gradient(90deg, #ff1744, #ff5252);
         }
 
+        .task-instructions {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2196f3;
+            font-size: 0.9em;
+            color: #1565c0;
+        }
+
         @media (max-width: 600px) {
             .header h1 {
                 font-size: 1.8em;
@@ -628,6 +691,14 @@
                 <!-- Задания -->
                 <div id="tasks-tab" class="hidden">
                     <h2 style="margin-bottom: 20px; text-align: center;">🎯 Доступные задания</h2>
+                    
+                    <div class="task-instructions">
+                        <strong>ℹ️ Как выполнять задания:</strong><br>
+                        1. Выполни задание в сообществе (поставь лайки, напиши комментарии)<br>
+                        2. Вернись сюда и отметь чекбокс «Я выполнил!»<br>
+                        3. Нажми «Получить награду»
+                    </div>
+                    
                     <div class="tasks-container" id="tasks-container">
                         <!-- Задания будут добавлены динамически -->
                     </div>
@@ -694,19 +765,75 @@
             },
             collection: [],
             tasks: [
-                { id: 1, name: 'Поставить 5 лайков', reward: { type: 'stat', stat: 'charisma', value: 10 }, icon: '👍', cost: 5 },
-                { id: 2, name: 'Написать 3 комментария', reward: { type: 'stat', stat: 'creativity', value: 15 }, icon: '💬', cost: 10 },
-                { id: 3, name: 'Сделать 2 репоста', reward: { type: 'stat', stat: 'intelligence', value: 8 }, icon: '🔄', cost: 8 },
-                { id: 4, name: 'Найти скрытый символ', reward: { type: 'item', item: '🕶️ Очки стиляги', rarity: 'rare' }, icon: '🔍', cost: 15 },
-                { id: 5, name: 'Пригласить друга', reward: { type: 'item', item: '👑 Корона лидера', rarity: 'legendary' }, icon: '👑', cost: 20 },
-                { id: 6, name: 'Поставить 10 лайков', reward: { type: 'stat', stat: 'charisma', value: 25 }, icon: '❤️', cost: 12 },
-                { id: 7, name: 'Написать 5 комментариев', reward: { type: 'stat', stat: 'creativity', value: 30 }, icon: '✍️', cost: 18 },
-                { id: 8, name: 'Сделать 5 репостов', reward: { type: 'item', item: '🚀 Ракета скорости', rarity: 'rare' }, icon: '🚀', cost: 25 }
+                { 
+                    id: 1, 
+                    name: 'Поставить 5 лайков', 
+                    description: 'Поставь 5 лайков под постами в нашем сообществе',
+                    reward: { type: 'stat', stat: 'charisma', value: 10 }, 
+                    icon: '👍', 
+                    cost: 5 
+                },
+                { 
+                    id: 2, 
+                    name: 'Написать 3 комментария', 
+                    description: 'Напиши 3 комментария под разными постами',
+                    reward: { type: 'stat', stat: 'creativity', value: 15 }, 
+                    icon: '💬', 
+                    cost: 10 
+                },
+                { 
+                    id: 3, 
+                    name: 'Сделать 2 репоста', 
+                    description: 'Сделай 2 репоста интересных постов',
+                    reward: { type: 'stat', stat: 'intelligence', value: 8 }, 
+                    icon: '🔄', 
+                    cost: 8 
+                },
+                { 
+                    id: 4, 
+                    name: 'Найти скрытый символ', 
+                    description: 'Найди скрытый символ 🎯 в одном из наших постов',
+                    reward: { type: 'item', item: '🕶️ Очки стиляги', rarity: 'rare' }, 
+                    icon: '🔍', 
+                    cost: 15 
+                },
+                { 
+                    id: 5, 
+                    name: 'Пригласить друга', 
+                    description: 'Пригласи друга присоединиться к игре',
+                    reward: { type: 'item', item: '👑 Корона лидера', rarity: 'legendary' }, 
+                    icon: '👑', 
+                    cost: 20 
+                },
+                { 
+                    id: 6, 
+                    name: 'Поставить 10 лайков', 
+                    description: 'Поставь 10 лайков под постами за один день',
+                    reward: { type: 'stat', stat: 'charisma', value: 25 }, 
+                    icon: '❤️', 
+                    cost: 12 
+                },
+                { 
+                    id: 7, 
+                    name: 'Написать 5 комментариев', 
+                    description: 'Напиши 5 развёрнутых комментариев',
+                    reward: { type: 'stat', stat: 'creativity', value: 30 }, 
+                    icon: '✍️', 
+                    cost: 18 
+                },
+                { 
+                    id: 8, 
+                    name: 'Сделать 5 репостов', 
+                    description: 'Поделись 5 постами с друзьями',
+                    reward: { type: 'item', item: '🚀 Ракета скорости', rarity: 'rare' }, 
+                    icon: '🚀', 
+                    cost: 25 
+                }
             ],
             completedTasks: [],
             lastLogin: null,
             dailyBonusClaimed: false,
-            version: '1.0'
+            version: '2.0' // Обновлённая версия с гибридной системой
         };
 
         // Опции для кастомизации аватара
@@ -716,40 +843,33 @@
 
         // Инициализация игры
         function initGame() {
-            // Проверяем, есть ли сохраненные данные
             const savedData = localStorage.getItem('avatarEvolutionData');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                // Обновляем структуру данных, если версия старая
                 if (parsedData.version !== gameData.version) {
                     gameData = {...gameData, ...parsedData};
                 } else {
                     gameData = parsedData;
                 }
-                // Проверяем ежедневный бонус
                 checkDailyBonus();
                 showMainScreen();
             } else {
-                // Новый игрок
                 showAvatarCreator();
                 renderCustomizationOptions();
             }
             updateUI();
         }
 
-        // Отображение экрана создания аватара
         function showAvatarCreator() {
             document.getElementById('avatar-creator-screen').classList.remove('hidden');
             document.getElementById('main-game-screen').classList.add('hidden');
         }
 
-        // Отображение основного экрана игры
         function showMainScreen() {
             document.getElementById('avatar-creator-screen').classList.add('hidden');
             document.getElementById('main-game-screen').classList.remove('hidden');
         }
 
-        // Рендер опций кастомизации
         function renderCustomizationOptions() {
             const hairContainer = document.getElementById('hair-options');
             const faceContainer = document.getElementById('face-options');
@@ -795,27 +915,23 @@
             });
         }
 
-        // Случайная генерация аватара
         function randomizeAvatar() {
             gameData.avatar.hair = hairOptions[Math.floor(Math.random() * hairOptions.length)];
             gameData.avatar.face = faceOptions[Math.floor(Math.random() * faceOptions.length)];
             gameData.avatar.clothes = clothesOptions[Math.floor(Math.random() * clothesOptions.length)];
             
-            // Обновляем активные кнопки
             document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
             
             updateAvatarPreview();
             showNotification('🎲 Аватар случайно сгенерирован!', 'info');
         }
 
-        // Обновить превью аватара
         function updateAvatarPreview() {
             document.getElementById('avatar-hair').textContent = gameData.avatar.hair;
             document.getElementById('avatar-face').textContent = gameData.avatar.face;
             document.getElementById('avatar-clothes').textContent = gameData.avatar.clothes;
         }
 
-        // Следующий шаг (переход к основной игре)
         function nextStep() {
             if (gameData.stats.energy === 0) {
                 gameData.stats.energy = 100;
@@ -826,7 +942,6 @@
             showMainScreen();
             showNotification('🎉 Аватар создан! Добро пожаловать в игру!', 'success');
             
-            // Добавляем стартовые предметы
             setTimeout(() => {
                 gameData.collection.push('🎁 Стартовый подарок');
                 gameData.stats.creativity += 5;
@@ -838,17 +953,13 @@
             }, 1000);
         }
 
-        // Переключение вкладок
         function switchTab(tabName) {
-            // Скрыть все вкладки
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('[id$="-tab"]').forEach(tab => tab.classList.add('hidden'));
             
-            // Показать выбранную вкладку
             event.target.classList.add('active');
             document.getElementById(tabName + '-tab').classList.remove('hidden');
             
-            // Обновить контент вкладки
             if (tabName === 'tasks') {
                 renderTasks();
             } else if (tabName === 'collection') {
@@ -858,7 +969,7 @@
             }
         }
 
-        // Отображение заданий
+        // Отображение заданий с гибридной системой
         function renderTasks() {
             const container = document.getElementById('tasks-container');
             container.innerHTML = '';
@@ -883,21 +994,29 @@
                 if (gameData.stats.energy >= task.cost) {
                     const taskCard = document.createElement('div');
                     taskCard.className = 'task-card';
+                    taskCard.id = 'task-' + task.id;
                     taskCard.innerHTML = `
                         <div class="task-title">
                             <span>${task.icon}</span>
                             <span>${task.name}</span>
                         </div>
+                        <div class="task-description">${task.description}</div>
                         <div class="task-reward">
                             ${task.reward.type === 'stat' 
                                 ? `+${task.reward.value} к ${getStatName(task.reward.stat)}` 
                                 : `🎁 ${task.reward.item}`}
                         </div>
-                        <div style="margin-top: 10px; font-size: 0.85em; color: #999;">
+                        <div style="margin-top: 8px; font-size: 0.85em; color: #999;">
                             💡 Требует: ${task.cost} энергии
                         </div>
+                        <div class="task-confirm">
+                            <input type="checkbox" id="confirm-${task.id}" onchange="toggleTaskButton(${task.id})">
+                            <label for="confirm-${task.id}">Я выполнил(а) это задание в сообществе</label>
+                        </div>
+                        <button class="button task-button" id="btn-${task.id}" onclick="completeTask(${task.id})" disabled>
+                            <span>🎁</span> Получить награду
+                        </button>
                     `;
-                    taskCard.onclick = () => completeTask(task.id);
                     container.appendChild(taskCard);
                 }
             });
@@ -916,7 +1035,16 @@
             }
         }
 
-        // Получение названия характеристики
+        // Активация кнопки при отметке чекбокса
+        function toggleTaskButton(taskId) {
+            const checkbox = document.getElementById('confirm-' + taskId);
+            const button = document.getElementById('btn-' + taskId);
+            
+            if (checkbox && button) {
+                button.disabled = !checkbox.checked;
+            }
+        }
+
         function getStatName(stat) {
             const names = {
                 creativity: 'креативности',
@@ -927,7 +1055,7 @@
             return names[stat] || stat;
         }
 
-        // Выполнение задания
+        // Выполнение задания (теперь с подтверждением)
         function completeTask(taskId) {
             const task = gameData.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -937,15 +1065,21 @@
                 return;
             }
             
+            const checkbox = document.getElementById('confirm-' + taskId);
+            if (!checkbox || !checkbox.checked) {
+                showNotification('⚠️ Отметьте чекбокс "Я выполнил!"', 'warning');
+                return;
+            }
+            
             // Награда за задание
             if (task.reward.type === 'stat') {
                 gameData.stats[task.reward.stat] += task.reward.value;
-                showNotification(`✅ Задание выполнено! +${task.reward.value} к ${getStatName(task.reward.stat)}`, 'success');
+                showNotification(`✅ Отлично! +${task.reward.value} к ${getStatName(task.reward.stat)}`, 'success');
             } else if (task.reward.type === 'item') {
                 gameData.collection.push(task.reward.item);
                 const rarityText = task.reward.rarity === 'legendary' ? 'легендарный' : 
                                    task.reward.rarity === 'rare' ? 'редкий' : 'обычный';
-                showNotification(`✅ Задание выполнено! Получен ${rarityText} предмет: ${task.reward.item}`, 'success');
+                showNotification(`✅ Поздравляем! Получен ${rarityText} предмет: ${task.reward.item}`, 'success');
             }
             
             // Добавляем в выполненные
@@ -956,6 +1090,7 @@
             
             saveGameData();
             updateUI();
+            renderTasks(); // Обновляем список заданий
             
             // Восстановление энергии через время
             setTimeout(() => {
@@ -964,18 +1099,18 @@
                     saveGameData();
                     updateUI();
                 }
-            }, 300000); // 5 минут
+            }, 300000);
         }
 
-        // Сброс заданий (для тестирования)
         function resetTasks() {
-            gameData.completedTasks = [];
-            saveGameData();
-            renderTasks();
-            showNotification('🔄 Задания сброшены!', 'info');
+            if (confirm('Вы уверены? Все выполненные задания станут доступными снова.')) {
+                gameData.completedTasks = [];
+                saveGameData();
+                renderTasks();
+                showNotification('🔄 Задания сброшены!', 'info');
+            }
         }
 
-        // Отображение коллекции
         function renderCollection() {
             const container = document.getElementById('collection-grid');
             container.innerHTML = '';
@@ -1013,7 +1148,6 @@
             });
         }
 
-        // Проверка ежедневного бонуса
         function checkDailyBonus() {
             const today = new Date().toDateString();
             const lastLogin = gameData.lastLogin ? new Date(gameData.lastLogin).toDateString() : null;
@@ -1028,14 +1162,12 @@
             }
         }
 
-        // Получение ежедневного бонуса
         function claimDailyBonus() {
             if (gameData.dailyBonusClaimed) {
                 showNotification('🎁 Бонус уже получен сегодня!', 'warning');
                 return;
             }
             
-            // Добавляем случайный предмет в коллекцию
             const bonusItems = [
                 '🎉 Эмоция: танец',
                 '✨ Эффект: свечение',
@@ -1048,7 +1180,6 @@
             ];
             const randomItem = bonusItems[Math.floor(Math.random() * bonusItems.length)];
             
-            // Определяем редкость
             let rarity = '';
             if (randomItem.includes('Корона') || randomItem.includes('Звезда')) {
                 rarity = 'legendary';
@@ -1057,10 +1188,7 @@
             }
             
             gameData.collection.push(randomItem);
-            
-            // Восстанавливаем энергию
             gameData.stats.energy = 100;
-            
             gameData.dailyBonusClaimed = true;
             gameData.lastLogin = new Date().toISOString();
             
@@ -1070,16 +1198,12 @@
             showNotification(`🎁 Получен ежедневный бонус: ${rarityText} предмет "${randomItem}"! Энергия восстановлена!`, 'success');
             saveGameData();
             updateUI();
-            
-            // Скрываем блок бонуса
             document.getElementById('daily-bonus').style.display = 'none';
         }
 
-        // Приглашение друзей
         function inviteFriends() {
             showNotification('👥 Отправляю приглашения друзьям...', 'info');
             
-            // Имитация отправки приглашений
             setTimeout(() => {
                 const friendsCount = Math.floor(Math.random() * 3) + 1;
                 gameData.stats.charisma += friendsCount * 10;
@@ -1096,7 +1220,6 @@
             }, 1500);
         }
 
-        // Поиск партнера
         function findPartner() {
             showNotification('🔍 Ищу партнера для совместных квестов...', 'info');
             
@@ -1104,7 +1227,6 @@
                 const partners = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Екатерина', 'Иван', 'Ольга'];
                 const randomPartner = partners[Math.floor(Math.random() * partners.length)];
                 
-                // 30% шанс не найти партнера
                 if (Math.random() < 0.3) {
                     showNotification('⚠️ Не удалось найти партнера. Попробуйте позже!', 'warning');
                     return;
@@ -1112,7 +1234,6 @@
                 
                 showNotification(`✅ Найден партнер: ${randomPartner}! Теперь вы можете выполнять совместные задания.`, 'success');
                 
-                // Добавляем бонус за поиск партнера
                 gameData.stats.creativity += 10;
                 gameData.collection.push('🤝 Знак дружбы');
                 saveGameData();
@@ -1120,30 +1241,24 @@
             }, 2000);
         }
 
-        // Обновление интерфейса
         function updateUI() {
-            // Обновление статистики
             document.getElementById('creativity-value').textContent = gameData.stats.creativity;
             document.getElementById('charisma-value').textContent = gameData.stats.charisma;
             document.getElementById('intelligence-value').textContent = gameData.stats.intelligence;
             document.getElementById('energy-value').textContent = gameData.stats.energy;
             
-            // Обновление прогресс-баров
             document.getElementById('creativity-progress').style.width = `${Math.min(100, gameData.stats.creativity)}%`;
             document.getElementById('charisma-progress').style.width = `${Math.min(100, gameData.stats.charisma)}%`;
             document.getElementById('intelligence-progress').style.width = `${Math.min(100, gameData.stats.intelligence)}%`;
             document.getElementById('energy-progress').style.width = `${gameData.stats.energy}%`;
             
-            // Проверка ежедневного бонуса
             checkDailyBonus();
         }
 
-        // Сохранение данных игры
         function saveGameData() {
             localStorage.setItem('avatarEvolutionData', JSON.stringify(gameData));
         }
 
-        // Показать уведомление
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = 'notification ' + type;
@@ -1158,16 +1273,14 @@
             }, 3000);
         }
 
-        // Автоматическое восстановление энергии (каждые 5 минут)
         setInterval(() => {
             if (gameData.stats.energy < 100 && gameData.lastLogin) {
                 gameData.stats.energy = Math.min(100, gameData.stats.energy + 1);
                 saveGameData();
                 updateUI();
             }
-        }, 300000); // 5 минут = 300000 мс
+        }, 300000);
 
-        // Инициализация при загрузке
         window.onload = initGame;
     </script>
 </body>

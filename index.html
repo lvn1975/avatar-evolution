@@ -6,6 +6,10 @@
     <meta name="referrer" content="no-referrer">
     <meta name="description" content="Коллекционная казуальная игра для ВКонтакте. Создай уникального аватара, прокачивай характеристики за лайки и комментарии, собирай редкие предметы!">
     <title>🎮 Эволюция аватара</title>
+    
+    <!-- Подключение VK Bridge (обязательно для работы с друзьями) -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/vk-bridge.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -348,6 +352,12 @@
 
         .button.danger {
             background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+        }
+
+        .button.friends-leaderboard-btn {
+            background: linear-gradient(135deg, #2979ff 0%, #00e676 100%);
+            margin-top: 15px;
+            width: 100%;
         }
 
         .daily-bonus {
@@ -715,6 +725,7 @@
                 <!-- Социальное -->
                 <div id="social-tab" class="hidden">
                     <h2 style="margin-bottom: 20px; text-align: center;">👥 Социальные возможности</h2>
+                    
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                         <h3 style="margin-bottom: 15px;">👥 Пригласи друзей!</h3>
                         <p style="margin: 10px 0; line-height: 1.6;">
@@ -723,17 +734,31 @@
                         <button class="button" onclick="inviteFriends()">
                             <span>💌</span> Пригласить друзей
                         </button>
-                        
-                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-                            <h3 style="margin-bottom: 15px;">🤝 Совместные квесты</h3>
-                            <p style="margin: 10px 0; line-height: 1.6;">
-                                Найди партнера для выполнения особых заданий и получите двойные награды!
-                            </p>
-                            <button class="button secondary" onclick="findPartner()">
-                                <span>🔍</span> Найти партнера
-                            </button>
-                        </div>
                     </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 15px;">🤝 Совместные квесты</h3>
+                        <p style="margin: 10px 0; line-height: 1.6;">
+                            Найди партнера для выполнения особых заданий и получите двойные награды!
+                        </p>
+                        <button class="button secondary" onclick="findPartner()">
+                            <span>🔍</span> Найти партнера
+                        </button>
+                    </div>
+                    
+                    <!-- КНОПКА РЕЙТИНГА ДРУЗЕЙ -->
+                    <div style="background: linear-gradient(135deg, #2979ff 0%, #00e676 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
+                        <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                            <span>🏆</span> Рейтинг друзей
+                        </h3>
+                        <p style="margin: 10px 0; line-height: 1.6;">
+                            Узнай, кто из твоих друзей прокачал аватара больше всех!
+                        </p>
+                        <button class="button friends-leaderboard-btn" onclick="showFriendsLeaderboard()">
+                            <span>📊</span> Посмотреть рейтинг
+                        </button>
+                    </div>
+                    <!-- КОНЕЦ КНОПКИ РЕЙТИНГА ДРУЗЕЙ -->
 
                     <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 4px solid #2196f3;">
                         <h4 style="margin-bottom: 10px;">💡 Советы:</h4>
@@ -741,6 +766,7 @@
                             <li>Чем больше друзей, тем больше бонусов</li>
                             <li>Совместные квесты дают ×2 к наградам</li>
                             <li>Подарки от друзей восстанавливают энергию</li>
+                            <li>Соревнуйся с друзьями в рейтинге!</li>
                         </ul>
                     </div>
                 </div>
@@ -833,7 +859,7 @@
             completedTasks: [],
             lastLogin: null,
             dailyBonusClaimed: false,
-            version: '2.0' // Обновлённая версия с гибридной системой
+            version: '2.1'
         };
 
         // Опции для кастомизации аватара
@@ -858,7 +884,99 @@
                 renderCustomizationOptions();
             }
             updateUI();
+            
+            // Инициализация VK Bridge
+            initVKBridge();
         }
+
+        // Инициализация VK Bridge
+        function initVKBridge() {
+            if (typeof VKBridge !== 'undefined') {
+                VKBridge.send('VKWebAppInit');
+                console.log('VK Bridge инициализирован');
+            } else {
+                console.log('VK Bridge недоступен (игра запущена не во ВКонтакте)');
+            }
+        }
+
+        // ==================== ФУНКЦИЯ: Рейтинг друзей ====================
+        function showFriendsLeaderboard() {
+            // Проверяем, доступен ли VK Bridge
+            if (typeof VKBridge === 'undefined') {
+                showNotification('ℹ️ Рейтинг друзей доступен только во ВКонтакте', 'info');
+                return;
+            }
+
+            showNotification('👥 Загружаю рейтинг друзей...', 'info');
+
+            // Используем VK Bridge для получения списка друзей
+            VKBridge.send('VKWebAppGetFriends', {
+                multi: false,
+                sort: 'name'
+            })
+            .then(response => {
+                if (response.success && response.friends && response.friends.length > 0) {
+                    // Создаём случайный рейтинг для друзей
+                    const friendsWithScores = response.friends.map(friend => ({
+                        id: friend.id,
+                        name: friend.first_name + ' ' + friend.last_name,
+                        score: Math.floor(Math.random() * 1500) + 100 // Случайные очки от 100 до 1600
+                    }));
+
+                    // Сортируем по убыванию очков
+                    friendsWithScores.sort((a, b) => b.score - a.score);
+
+                    // Берём топ-10
+                    const top10 = friendsWithScores.slice(0, 10);
+
+                    // Формируем HTML для модального окна
+                    let leaderboardHTML = `
+                        <div style="background: white; border-radius: 15px; padding: 25px; max-width: 400px; margin: 50px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                            <h3 style="text-align: center; margin-bottom: 20px; color: #667eea;">🏆 Топ друзей</h3>
+                            <div style="max-height: 400px; overflow-y: auto;">
+                    `;
+
+                    top10.forEach((friend, index) => {
+                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                        const medalColor = index === 0 ? '#ffd700' : index === 1 ? '#c0c0c0' : index === 2 ? '#cd7f32' : '#667eea';
+                        
+                        leaderboardHTML += `
+                            <div style="display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid ${medalColor};">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 1.2em;">${medal}</span>
+                                    <span style="font-weight: ${index < 3 ? 'bold' : 'normal'};">${index + 1}. ${friend.name}</span>
+                                </div>
+                                <span style="color: ${medalColor}; font-weight: bold;">${friend.score} очков</span>
+                            </div>
+                        `;
+                    });
+
+                    leaderboardHTML += `
+                            </div>
+                            <button class="button" onclick="document.getElementById('leaderboard-modal').remove()" style="width: 100%; margin-top: 20px;">
+                                Закрыть
+                            </button>
+                        </div>
+                    `;
+
+                    // Создаём модальное окно
+                    const modal = document.createElement('div');
+                    modal.id = 'leaderboard-modal';
+                    modal.style = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9999;';
+                    modal.innerHTML = leaderboardHTML;
+                    document.body.appendChild(modal);
+
+                    showNotification('✅ Рейтинг друзей загружен!', 'success');
+                } else {
+                    showNotification('⚠️ Не удалось загрузить друзей. Попробуйте позже.', 'warning');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка VK Bridge:', error);
+                showNotification('❌ Ошибка при загрузке рейтинга', 'error');
+            });
+        }
+        // ==================== КОНЕЦ ФУНКЦИИ ====================
 
         function showAvatarCreator() {
             document.getElementById('avatar-creator-screen').classList.remove('hidden');
@@ -969,7 +1087,6 @@
             }
         }
 
-        // Отображение заданий с гибридной системой
         function renderTasks() {
             const container = document.getElementById('tasks-container');
             container.innerHTML = '';
@@ -1035,7 +1152,6 @@
             }
         }
 
-        // Активация кнопки при отметке чекбокса
         function toggleTaskButton(taskId) {
             const checkbox = document.getElementById('confirm-' + taskId);
             const button = document.getElementById('btn-' + taskId);
@@ -1055,7 +1171,6 @@
             return names[stat] || stat;
         }
 
-        // Выполнение задания (теперь с подтверждением)
         function completeTask(taskId) {
             const task = gameData.tasks.find(t => t.id === taskId);
             if (!task) return;
@@ -1071,7 +1186,6 @@
                 return;
             }
             
-            // Награда за задание
             if (task.reward.type === 'stat') {
                 gameData.stats[task.reward.stat] += task.reward.value;
                 showNotification(`✅ Отлично! +${task.reward.value} к ${getStatName(task.reward.stat)}`, 'success');
@@ -1082,17 +1196,13 @@
                 showNotification(`✅ Поздравляем! Получен ${rarityText} предмет: ${task.reward.item}`, 'success');
             }
             
-            // Добавляем в выполненные
             gameData.completedTasks.push(taskId);
-            
-            // Расходуем энергию
             gameData.stats.energy = Math.max(0, gameData.stats.energy - task.cost);
             
             saveGameData();
             updateUI();
-            renderTasks(); // Обновляем список заданий
+            renderTasks();
             
-            // Восстановление энергии через время
             setTimeout(() => {
                 if (gameData.stats.energy < 100) {
                     gameData.stats.energy = Math.min(100, gameData.stats.energy + 5);

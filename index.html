@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <meta name="description" content="Коллекционная казуальная игра для ВКонтакте. Создай уникального аватара, прокачивай характеристики за лайки и комментарии, собирай редкие предметы!">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>🎮 Эволюция аватара</title>
-    
-    <!-- VK Bridge (обязательно для работы в ВК) -->
-    <script src="https://unpkg.com/@vkontakte/vk-bridge@2.11.0/dist/vk-bridge.min.js"></script>
-    
     <style>
         * {
             margin: 0;
@@ -25,46 +21,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-        }
-
-        /* Прелоадер для ВК */
-        .vk-preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
-        }
-        
-        .vk-preloader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .vk-preloader-spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .vk-preloader-text {
-            color: white;
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
         }
 
         .game-container {
@@ -539,15 +495,7 @@
     </style>
 </head>
 <body>
-    <!-- Прелоадер для ВК -->
-    <div class="vk-preloader" id="vkPreloader">
-        <div style="text-align: center;">
-            <div class="vk-preloader-spinner"></div>
-            <div class="vk-preloader-text">Загрузка игры...</div>
-        </div>
-    </div>
-
-    <div class="game-container" id="gameContainer" style="display: none;">
+    <div class="game-container">
         <div class="header">
             <h1>🎮 Эволюция аватара</h1>
             <p>Развивай своего персонажа и собирай уникальную коллекцию!</p>
@@ -730,62 +678,6 @@
     </div>
 
     <script>
-        // ==================== VK BRIDGE ИНИЦИАЛИЗАЦИЯ ====================
-        let isVKPlatform = false;
-        let vkUserId = null;
-
-        // Проверяем, запущена ли игра во ВКонтакте
-        function isVK() {
-            return window.location !== window.parent.location || 
-                   window.navigator.userAgent.includes('VKWebView') ||
-                   window.navigator.userAgent.includes('VKApp');
-        }
-
-        // Инициализация игры
-        async function initGameVK() {
-            if (isVK()) {
-                isVKPlatform = true;
-                
-                try {
-                    // Инициализируем VK Bridge
-                    await vkBridge.send('VKWebAppInit');
-                    
-                    // Получаем информацию о пользователе
-                    const userInfo = await vkBridge.send('VKWebAppGetUserInfo');
-                    vkUserId = userInfo.id;
-                    
-                    console.log('VK Bridge инициализирован!');
-                    console.log('User ID:', vkUserId);
-                    
-                    // Скрываем прелоадер
-                    document.getElementById('vkPreloader').classList.add('hidden');
-                    document.getElementById('gameContainer').style.display = 'block';
-                    
-                    // Запускаем игру
-                    initGame();
-                    
-                } catch (error) {
-                    console.error('Ошибка инициализации VK Bridge:', error);
-                    
-                    // Если ошибка — всё равно запускаем игру (для тестирования)
-                    document.getElementById('vkPreloader').classList.add('hidden');
-                    document.getElementById('gameContainer').style.display = 'block';
-                    initGame();
-                    
-                    showNotification('⚠️ Режим тестирования (не во ВКонтакте)', 'warning');
-                }
-            } else {
-                // Запуск на обычном сайте (GitHub Pages)
-                document.getElementById('vkPreloader').classList.add('hidden');
-                document.getElementById('gameContainer').style.display = 'block';
-                initGame();
-                
-                console.log('Запуск в обычном браузере (не ВК)');
-            }
-        }
-
-        // ==================== ОСТАЛЬНОЙ КОД ИГРЫ ====================
-        
         // Глобальные переменные игры
         let gameData = {
             avatar: {
@@ -1276,7 +1168,7 @@
         }, 300000); // 5 минут = 300000 мс
 
         // Инициализация при загрузке
-        window.onload = initGameVK;
+        window.onload = initGame;
     </script>
 </body>
 </html>
